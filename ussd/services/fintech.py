@@ -1,3 +1,5 @@
+from django.db import transaction
+
 from ussd.models import User, Account, Transaction
 
 
@@ -9,6 +11,7 @@ def get_balance(phone_number: str) -> float:
     return account.balance
 
 
+@transaction.atomic
 def handle_transfer(sender_phone_number: str, receiver_phone_number: str, amount: float) -> tuple[bool, str]:
     """ Handles a transfer from a sender to a receiver """
     try:
@@ -27,14 +30,13 @@ def handle_transfer(sender_phone_number: str, receiver_phone_number: str, amount
         sender_account.save()
         receiver_account.save()
 
-        transaction = Transaction.objects.create(
+        Transaction.objects.create(
             sender=sender,
             receiver=receiver,
             amount=amount,
             transaction_type='debit',
             status='success'
         )
-        transaction.save()
 
         return True, "Transfer successful"
     except Exception as e:
