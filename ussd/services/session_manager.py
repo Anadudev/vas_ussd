@@ -1,4 +1,12 @@
+from datetime import timedelta
+from django.utils import timezone
 from ussd.models import UssdSession
+
+SESSION_TIMEOUT = 120
+
+
+def is_session_expired(session: UssdSession) -> bool:
+    return timezone.now() - session.updated_at > timedelta(seconds=SESSION_TIMEOUT)
 
 
 def get_or_create_session(session_id: str, phone_number: str) -> UssdSession:

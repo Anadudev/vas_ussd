@@ -1,10 +1,14 @@
 from ussd.models import UssdSession, User, Account
 from ussd.services.fintech import get_balance, handle_transfer
-from ussd.services.session_manager import update_session, clear_session
+from ussd.services.session_manager import update_session, clear_session, is_session_expired
 
 
 def ussd_handler(session: UssdSession, text: str, phone_number: str) -> str:
     """ Handle USSD requests and interactions """
+    if is_session_expired(session):
+        clear_session(session)
+        return "END Session expired"
+
     data = session.data
 
     if text == "":
