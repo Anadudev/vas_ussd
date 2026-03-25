@@ -1,5 +1,6 @@
 from ussd.models import UssdSession, User, Account
 from ussd.services.fintech import get_balance, handle_transfer
+from ussd.services.notification import send_sms
 from ussd.services.session_manager import update_session, clear_session, is_session_expired
 
 
@@ -46,6 +47,7 @@ def ussd_handler(session: UssdSession, text: str, phone_number: str) -> str:
             clear_session(session)
 
             if success:
+                send_sms(phone_number, f"Transfer of {amount} to {receiver} successful")
                 return f"END Transfer successful"
             else:
                 return f"END failed: {message}"
