@@ -1,4 +1,4 @@
-from ussd.models import UssdSession
+from ussd.models import UssdSession, User, Account
 from ussd.services.fintech import get_balance, handle_transfer
 from ussd.services.session_manager import update_session, clear_session
 
@@ -29,6 +29,14 @@ def ussd_handler(session: UssdSession, text: str, phone_number: str) -> str:
         elif len(inputs) == 4:
             receiver = data.get("receiver")
             amount = float(data.get("amount"))
+            pin = inputs[3]
+
+            user = User.objects.get(phone_number=phone_number)
+            account = Account.objects.get(user=user)
+
+            if not account.check_pin(pin):
+                clear_session(session)
+                return "END Invalid PIN"
 
             success, message = handle_transfer(phone_number, receiver, amount)
             clear_session(session)
